@@ -4,11 +4,14 @@
 class BetterYoutube {
     constructor() {
         this.selectors = {
+            // Prefer scrolling the single recommendations items container to avoid nested scrollbars.
             recommendationsElement: [
-                'ytd-item-section-renderer.style-scope.ytd-watch-next-secondary-results-renderer',
+                'ytd-watch-next-secondary-results-renderer #items',
+                'ytd-watch-next-secondary-results-renderer',
                 '#related'
             ],
             commentsElement: [
+                'ytd-comments#comments',
                 'ytd-comments.style-scope.ytd-watch-flexy',
                 '#comments'
             ],
@@ -34,12 +37,110 @@ class BetterYoutube {
         this.pipBtnId = 'yt-pip-pro-btn';
         this.observer = null;
         this.pipObserver = null;
+        this._styleOverrides = new Map();
         this.settings = {
             pipEnabled: true,
             scrollEnabled: true
         };
         this.validateChromeAPIs();
         this.init();
+    }
+
+    /**
+     * Track and override inline style values so we can reliably revert them.
+     */
+    _overrideInlineStyle(element, property, value) {
+        if (!element) return;
+
+        // Prune disconnected elements to avoid unbounded growth.
+        for (const [el] of this._styleOverrides) {
+            if (!el || !el.isConnected) {
+                this._styleOverrides.delete(el);
+            }
+        }
+
+        let record = this._styleOverrides.get(element);
+        if (!record) {
+            record = {};
+            this._styleOverrides.set(element, record);
+        }
+
+        if (!(property in record)) {
+            record[property] = element.style[property];
+        }
+
+        element.style[property] = value;
+    }
+
+    _revertStyleOverrides() {
+        if (!this._styleOverrides) return;
+        for (const [element, record] of this._styleOverrides) {
+            if (!element || !element.isConnected) continue;
+            Object.keys(record).forEach(property => {
+                element.style[property] = record[property];
+            });
+        }
+        this._styleOverrides.clear();
+    }
+
+    _isElementScrollable(element) {
+        if (!element) return false;
+        const cs = window.getComputedStyle(element);
+        const overflowY = cs.overflowY;
+        if (overflowY !== 'auto' && overflowY !== 'scroll') return false;
+        return element.scrollHeight - element.clientHeight > 1;
+    }
+
+    /**
+     * YouTube sometimes introduces additional scroll containers in the right sidebar (notably during ads).
+     * Enforce a single scroller: the recommendations container we style.
+     */
+    enforceSingleRecommendationsScroller(recommendationsSection) {
+        if (!recommendationsSection) return;
+        if (!recommendationsSection.dataset || recommendationsSection.dataset.betterYoutubeScroll !== '1') return;
+
+        const sidebar = document.querySelector('#secondary');
+        if (!sidebar || !sidebar.contains(recommendationsSection)) return;
+
+        // Walk up from recommendations to sidebar and disable scrollbars on ancestors.
+        let current = recommendationsSection.parentElement;
+        while (current && current !== sidebar && current !== document.body && current !== document.documentElement) {
+            if (this._isElementScrollable(current)) {
+                this._overrideInlineStyle(current, 'overflowY', 'visible');
+                this._overrideInlineStyle(current, 'maxHeight', '');
+                this._overrideInlineStyle(current, 'height', '');
+            }
+            current = current.parentElement;
+        }
+
+        // Sidebar itself can become a scroll container during ads.
+        if (this._isElementScrollable(sidebar)) {
+            this._overrideInlineStyle(sidebar, 'overflowY', 'visible');
+            this._overrideInlineStyle(sidebar, 'maxHeight', '');
+            this._overrideInlineStyle(sidebar, 'height', '');
+        }
+    }
+
+    /**
+     * Older versions styled inner item-sections, which can create nested scrollbars.
+     * Clean those up proactively.
+     */
+    cleanupLegacyRecommendationSections() {
+        const legacySections = document.querySelectorAll(
+            'ytd-watch-next-secondary-results-renderer ytd-item-section-renderer'
+        );
+
+        legacySections.forEach(section => {
+            const looksLikeOurs =
+                section?.dataset?.betterYoutubeScroll === '1' ||
+                section.style.overflowY === this.styles.common.overflowY ||
+                !!section.style.maxHeight ||
+                section.style.backgroundColor === this.styles.common.backgroundColor;
+
+            if (looksLikeOurs) {
+                this.removeSectionHeight(section);
+            }
+        });
     }
 
     /**
@@ -102,6 +203,7 @@ class BetterYoutube {
         if (!section) return false;
         const height = Math.min(window.innerHeight * this.styles.maxHeights.defaultRatio, maxHeight);
         Object.assign(section.style, this.styles.common, { maxHeight: `${height}px` });
+        section.dataset.betterYoutubeScroll = '1';
         return true;
     }
 
@@ -114,6 +216,9 @@ class BetterYoutube {
             section.style[key] = '';
         });
         section.style.maxHeight = '';
+        if (section.dataset) {
+            delete section.dataset.betterYoutubeScroll;
+        }
         return true;
     }
 
@@ -121,6 +226,9 @@ class BetterYoutube {
      * Update all scroll sections
      */
     updateAllSections() {
+        // Prevent nested scroll containers from older selector choices.
+        this.cleanupLegacyRecommendationSections();
+
         const sections = {
             recommendations: this.findElement(this.selectors.recommendationsElement),
             comments: this.findElement(this.selectors.commentsElement)
@@ -134,6 +242,9 @@ class BetterYoutube {
             sections.comments,
             this.styles.maxHeights.comments
         );
+
+        // Ensure the right sidebar has only one scroll container.
+        this.enforceSingleRecommendationsScroller(sections.recommendations);
 
         return recommendationsUpdated && commentsUpdated;
     }
@@ -187,6 +298,7 @@ class BetterYoutube {
             this.observer.disconnect();
             this.observer = null;
         }
+        this._revertStyleOverrides();
         this.removeAllSections();
     }
 
@@ -400,6 +512,7 @@ class BetterYoutube {
             window.removeEventListener('resize', this.debouncedUpdate);
             this.debouncedUpdate = null;
         }
+        this._revertStyleOverrides();
         this.removeAllSections();
         this.removePiPButton();
     }
