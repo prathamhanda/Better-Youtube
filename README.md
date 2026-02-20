@@ -2,6 +2,10 @@
 
 A Chrome extension that enhances the YouTube viewing experience.
 
+## Demo
+
+![better-youtube-demo](https://github.com/user-attachments/assets/4f89a230-30a3-4f70-927c-8beb35110058)
+
 ## 🌟 Features
 
 ### 📜 Better Scrolling
@@ -29,9 +33,6 @@ A Chrome extension that enhances the YouTube viewing experience.
 - **Button Method**: Click the PiP button (📺) in the video player controls (next to miniplayer)
 - **Extension Popup**: Click the extension icon and select "Pop Out Video"
 
-## Demo
-
-![better-youtube-demo](https://github.com/user-attachments/assets/4f89a230-30a3-4f70-927c-8beb35110058)
 
 ## Contributing
 
