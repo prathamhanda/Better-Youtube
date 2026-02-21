@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- BetterYouTube favicon: YouTube-inspired, but intentionally distinct (notch + different ratios + subtle depth). -->
+  <defs>
+    <linearGradient id="bg" x1="10" y1="16" x2="54" y2="50" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F43F5E"/>
+      <stop offset="1" stop-color="#BE123C"/>
+    </linearGradient>
+    <filter id="softShadow" x="0" y="0" width="64" height="64" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="1" stdDeviation="1.2" flood-color="#000000" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+
+  <g filter="url(#softShadow)">
+    <rect x="6" y="14" width="52" height="36" rx="11" fill="url(#bg)"/>
+    <!-- top highlight -->
+    <path d="M17 18H47C52.5 18 56 21.5 56 27V27.5C56 22 52.5 18.5 47 18.5H17C11.5 18.5 8 22 8 27.5V27C8 21.5 11.5 18 17 18Z" fill="#FFFFFF" opacity="0.12"/>
+    <!-- notch detail (signature) -->
+    <path d="M54.5 24.2c0 0-3.6 1.7-3.6 4.8s3.6 4.8 3.6 4.8" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" opacity="0.85"/>
+    <!-- play glyph (refined) -->
+    <path d="M28.6 25.3C28.6 23.8 30.2 22.9 31.5 23.6L45.2 31.2C46.5 31.9 46.5 33.8 45.2 34.5L31.5 42.1C30.2 42.8 28.6 41.9 28.6 40.4V25.3Z" fill="#FFFFFF"/>
+  </g>
+</svg>
