@@ -12,6 +12,8 @@ const CreatorSection = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-80px" });
 
+  const avatarUrl = `${import.meta.env.BASE_URL}Pratham-PFP.jpg`;
+
   return (
     <section ref={ref} className="section-padding">
       <div className="max-w-3xl mx-auto text-center">
@@ -32,7 +34,7 @@ const CreatorSection = () => {
         >
             <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary/20 to-muted mx-auto mb-5 overflow-hidden">
             <img 
-              src="/public/Pratham-PFP.jpg" 
+              src={avatarUrl}
               alt="Pratham Handa" 
               className="w-full h-full object-cover"
             />
