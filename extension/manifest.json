@@ -21,7 +21,8 @@
     "storage"
   ],
   "host_permissions": [
-    "https://www.youtube.com/*"
+    "https://www.youtube.com/*",
+    "https://sponsor.ajay.app/*"
   ],
   "content_scripts": [
     {
@@ -29,6 +30,9 @@
         "https://www.youtube.com/*"
       ],
       "js": [
+        "speed-manager.js",
+        "sponsor-manager.js",
+        "focus-manager.js",
         "content.js"
       ],
       "run_at": "document_idle"

@@ -37,10 +37,27 @@ class BetterYoutube {
         this.pipBtnId = 'yt-pip-pro-btn';
         this.observer = null;
         this.pipObserver = null;
+        this.speedManager = null;
+        this.sponsorManager = null;
+        this.focusManager = null;
         this._styleOverrides = new Map();
         this.settings = {
             pipEnabled: true,
-            scrollEnabled: true
+            scrollEnabled: true,
+            speedEnabled: true,
+            speedStep: 0.25,
+            speedKeys: {
+                slower: 's',
+                faster: 'd',
+                reset: 'r'
+            },
+            sponsorBlockEnabled: true,
+            focusEnabled: false,
+            focusMode: {
+                hideShorts: true,
+                hideComments: false,
+                hideRecommendations: false
+            }
         };
         this.validateChromeAPIs();
         this.init();
@@ -172,6 +189,18 @@ class BetterYoutube {
 
         if (this.settings.pipEnabled) {
             this.setupPictureInPicture();
+        }
+
+        if (this.settings.speedEnabled) {
+            this.setupSpeedControls();
+        }
+
+        if (this.settings.sponsorBlockEnabled) {
+            this.setupSponsorBlock();
+        }
+
+        if (this.settings.focusEnabled) {
+            this.setupFocusMode();
         }
 
         this.setupEventListeners();
@@ -423,12 +452,162 @@ class BetterYoutube {
         }
 
         try {
-            const result = await chrome.storage.sync.get(['pipEnabled', 'scrollEnabled']);
+            const result = await chrome.storage.sync.get([
+                'pipEnabled',
+                'scrollEnabled',
+                'speedEnabled',
+                'speedStep',
+                'speedKeys',
+                'sponsorBlockEnabled',
+                'focusEnabled',
+                'focusMode'
+            ]);
             this.settings.pipEnabled = result.pipEnabled !== false;
             this.settings.scrollEnabled = result.scrollEnabled !== false;
+
+            this.settings.speedEnabled = result.speedEnabled !== false;
+            if (typeof result.speedStep === 'number' && Number.isFinite(result.speedStep)) {
+                this.settings.speedStep = result.speedStep;
+            }
+            if (result.speedKeys && typeof result.speedKeys === 'object') {
+                this.settings.speedKeys = {
+                    slower: result.speedKeys.slower || this.settings.speedKeys.slower,
+                    faster: result.speedKeys.faster || this.settings.speedKeys.faster,
+                    reset: result.speedKeys.reset || this.settings.speedKeys.reset
+                };
+            }
+
+            this.settings.sponsorBlockEnabled = result.sponsorBlockEnabled !== false;
+
+            this.settings.focusEnabled = result.focusEnabled === true;
+            if (result.focusMode && typeof result.focusMode === 'object') {
+                this.settings.focusMode = {
+                    hideShorts: result.focusMode.hideShorts !== false,
+                    hideComments: result.focusMode.hideComments === true,
+                    hideRecommendations: result.focusMode.hideRecommendations === true
+                };
+            }
         } catch (error) {
             console.log('BetterYoutube: Settings not available, using defaults');
         }
+    }
+
+    setupFocusMode() {
+        try {
+            if (!this.focusManager) {
+                if (typeof FocusManager !== 'function') {
+                    console.warn('BetterYoutube: FocusManager not available');
+                    return;
+                }
+
+                this.focusManager = new FocusManager({
+                    focusEnabled: this.settings.focusEnabled,
+                    hideShorts: !!this.settings.focusMode?.hideShorts,
+                    hideComments: !!this.settings.focusMode?.hideComments,
+                    hideRecommendations: !!this.settings.focusMode?.hideRecommendations
+                });
+
+                this.focusManager.start();
+            }
+
+            this.focusManager.updateSettings({
+                focusEnabled: this.settings.focusEnabled,
+                hideShorts: !!this.settings.focusMode?.hideShorts,
+                hideComments: !!this.settings.focusMode?.hideComments,
+                hideRecommendations: !!this.settings.focusMode?.hideRecommendations
+            });
+        } catch (err) {
+            console.warn('BetterYoutube: Could not set up Focus Mode:', err);
+        }
+    }
+
+    disableFocusMode() {
+        if (!this.focusManager) return;
+        try {
+            this.focusManager.updateSettings({ focusEnabled: false });
+        } catch {
+            // ignore
+        }
+        this.focusManager = null;
+    }
+
+    setupSpeedControls() {
+        try {
+            if (!this.speedManager) {
+                if (typeof SpeedManager !== 'function') {
+                    console.warn('BetterYoutube: SpeedManager not available');
+                    return;
+                }
+
+                this.speedManager = new SpeedManager({
+                    chromeAPIsAvailable: this.chromeAPIsAvailable,
+                    speedEnabled: this.settings.speedEnabled,
+                    speedStep: this.settings.speedStep,
+                    speedKeys: this.settings.speedKeys
+                });
+
+                // Start immediately on first setup.
+                this.speedManager.start().catch(err =>
+                    console.warn('BetterYoutube: SpeedManager start failed:', err)
+                );
+            }
+
+            Promise.resolve(this.speedManager.updateSettings({
+                speedEnabled: this.settings.speedEnabled,
+                speedStep: this.settings.speedStep,
+                speedKeys: this.settings.speedKeys
+            })).catch(err => console.warn('BetterYoutube: SpeedManager update failed:', err));
+        } catch (err) {
+            console.warn('BetterYoutube: Could not set up speed controls:', err);
+        }
+    }
+
+    disableSpeedControls() {
+        if (!this.speedManager) return;
+        try {
+            // Route through the manager so it can track enabled-state.
+            this.speedManager.updateSettings({ speedEnabled: false });
+        } catch {
+            // ignore
+        }
+    }
+
+    setupSponsorBlock() {
+        try {
+            if (!this.sponsorManager) {
+                if (typeof SponsorManager !== 'function') {
+                    console.warn('BetterYoutube: SponsorManager not available');
+                    return;
+                }
+
+                this.sponsorManager = new SponsorManager({
+                    chromeAPIsAvailable: this.chromeAPIsAvailable,
+                    sponsorBlockEnabled: this.settings.sponsorBlockEnabled
+                });
+
+                this.sponsorManager.start().catch(err =>
+                    console.warn('BetterYoutube: SponsorManager start failed:', err)
+                );
+            }
+
+            Promise.resolve(this.sponsorManager.updateSettings({
+                sponsorBlockEnabled: this.settings.sponsorBlockEnabled
+            })).catch(err => console.warn('BetterYoutube: SponsorManager update failed:', err));
+        } catch (err) {
+            console.warn('BetterYoutube: Could not set up SponsorBlock:', err);
+        }
+    }
+
+    disableSponsorBlock() {
+        if (!this.sponsorManager) return;
+        try {
+            this.sponsorManager.updateSettings({ sponsorBlockEnabled: false });
+        } catch {
+            // ignore
+        }
+
+        // Release references to ensure clean restart.
+        this.sponsorManager = null;
     }
 
     /**
@@ -454,7 +633,18 @@ class BetterYoutube {
      */
     updateSettings(newSettings) {
         const oldSettings = { ...this.settings };
-        this.settings = { ...newSettings };
+        this.settings = {
+            ...this.settings,
+            ...newSettings,
+            speedKeys: {
+                ...(this.settings.speedKeys || {}),
+                ...((newSettings && newSettings.speedKeys) || {})
+            },
+            focusMode: {
+                ...(this.settings.focusMode || {}),
+                ...((newSettings && newSettings.focusMode) || {})
+            }
+        };
 
         let hasChanges = false;
 
@@ -473,6 +663,40 @@ class BetterYoutube {
                 this.setupPictureInPicture();
             } else {
                 this.disablePictureInPicture();
+            }
+        }
+
+        if (
+            oldSettings.speedEnabled !== this.settings.speedEnabled ||
+            oldSettings.speedStep !== this.settings.speedStep ||
+            JSON.stringify(oldSettings.speedKeys || {}) !== JSON.stringify(this.settings.speedKeys || {})
+        ) {
+            hasChanges = true;
+            if (this.settings.speedEnabled) {
+                this.setupSpeedControls();
+            } else {
+                this.disableSpeedControls();
+            }
+        }
+
+        if (oldSettings.sponsorBlockEnabled !== this.settings.sponsorBlockEnabled) {
+            hasChanges = true;
+            if (this.settings.sponsorBlockEnabled) {
+                this.setupSponsorBlock();
+            } else {
+                this.disableSponsorBlock();
+            }
+        }
+
+        if (
+            oldSettings.focusEnabled !== this.settings.focusEnabled ||
+            JSON.stringify(oldSettings.focusMode || {}) !== JSON.stringify(this.settings.focusMode || {})
+        ) {
+            hasChanges = true;
+            if (this.settings.focusEnabled) {
+                this.setupFocusMode();
+            } else {
+                this.disableFocusMode();
             }
         }
 
@@ -512,6 +736,34 @@ class BetterYoutube {
             window.removeEventListener('resize', this.debouncedUpdate);
             this.debouncedUpdate = null;
         }
+
+        if (this.speedManager) {
+            try {
+                this.speedManager.stop();
+            } catch {
+                // ignore
+            }
+            this.speedManager = null;
+        }
+
+        if (this.sponsorManager) {
+            try {
+                this.sponsorManager.stop();
+            } catch {
+                // ignore
+            }
+            this.sponsorManager = null;
+        }
+
+        if (this.focusManager) {
+            try {
+                this.focusManager.stop();
+            } catch {
+                // ignore
+            }
+            this.focusManager = null;
+        }
+
         this._revertStyleOverrides();
         this.removeAllSections();
         this.removePiPButton();

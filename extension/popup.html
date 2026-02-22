@@ -105,6 +105,33 @@
         font-size: 12px;
         color: #ccc;
       }
+      .input-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 10px;
+        gap: 10px;
+      }
+      .text-input {
+        width: 90px;
+        padding: 6px 8px;
+        background: #0f0f0f;
+        color: #f1f1f1;
+        border: 1px solid #303030;
+        border-radius: 8px;
+        outline: none;
+        font-size: 12px;
+      }
+      .text-input:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+      .hint {
+        margin-top: 8px;
+        font-size: 11px;
+        color: #aaa;
+        line-height: 1.2;
+      }
       #not-youtube-hint {
         color: #ff0033;
         font-size: 12px;
@@ -145,6 +172,79 @@
       <div class="toggle-container">
         <span class="toggle-label">Enable Scrolling</span>
         <button class="toggle-switch active" id="scroll-toggle" role="switch" aria-checked="true" tabindex="0">
+          <div class="toggle-slider"></div>
+        </button>
+      </div>
+    </div>
+
+    <div class="feature-section">
+      <div class="feature-title">Playback Speed</div>
+      <div class="feature-description">Keyboard shortcuts + on-video speed badge</div>
+      <div class="toggle-container">
+        <span class="toggle-label">Enable Speed Controls</span>
+        <button class="toggle-switch active" id="speed-toggle" role="switch" aria-checked="true" tabindex="0">
+          <div class="toggle-slider"></div>
+        </button>
+      </div>
+
+      <div class="input-row">
+        <span class="toggle-label">Step</span>
+        <input class="text-input" id="speed-step" type="number" min="0.05" max="4" step="0.05" value="0.25" />
+      </div>
+
+      <div class="input-row">
+        <span class="toggle-label">Slower</span>
+        <input class="text-input" id="speed-key-slower" type="text" maxlength="12" placeholder="s" />
+      </div>
+      <div class="input-row">
+        <span class="toggle-label">Faster</span>
+        <input class="text-input" id="speed-key-faster" type="text" maxlength="12" placeholder="d" />
+      </div>
+      <div class="input-row">
+        <span class="toggle-label">Reset</span>
+        <input class="text-input" id="speed-key-reset" type="text" maxlength="12" placeholder="r" />
+      </div>
+
+      <div class="hint">Tip: click the on-video badge to reset to 1.00x.</div>
+    </div>
+
+    <div class="feature-section">
+      <div class="feature-title">SponsorBlock</div>
+      <div class="feature-description">Automatically skip sponsors, intros, and outros</div>
+      <div class="toggle-container">
+        <span class="toggle-label">Enable Auto-Skip</span>
+        <button class="toggle-switch active" id="sponsor-toggle" role="switch" aria-checked="true" tabindex="0">
+          <div class="toggle-slider"></div>
+        </button>
+      </div>
+      <div class="hint">Uses the public SponsorBlock community database.</div>
+    </div>
+
+    <div class="feature-section">
+      <div class="feature-title">Focus Mode</div>
+      <div class="feature-description">Hide distractions across YouTube</div>
+      <div class="toggle-container">
+        <span class="toggle-label">Enable Focus Mode</span>
+        <button class="toggle-switch" id="focus-toggle" role="switch" aria-checked="false" tabindex="0">
+          <div class="toggle-slider"></div>
+        </button>
+      </div>
+
+      <div class="toggle-container">
+        <span class="toggle-label">Hide Shorts</span>
+        <button class="toggle-switch" id="focus-shorts-toggle" role="switch" aria-checked="false" tabindex="0">
+          <div class="toggle-slider"></div>
+        </button>
+      </div>
+      <div class="toggle-container">
+        <span class="toggle-label">Hide Comments</span>
+        <button class="toggle-switch" id="focus-comments-toggle" role="switch" aria-checked="false" tabindex="0">
+          <div class="toggle-slider"></div>
+        </button>
+      </div>
+      <div class="toggle-container">
+        <span class="toggle-label">Hide Recommendations</span>
+        <button class="toggle-switch" id="focus-recs-toggle" role="switch" aria-checked="false" tabindex="0">
           <div class="toggle-slider"></div>
         </button>
       </div>
