@@ -1,11 +1,11 @@
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
-import { Github, Linkedin, Mail, Twitter } from "lucide-react";
+import { Github, Linkedin, Twitter, Globe } from "lucide-react";
 
 const socials = [
   { icon: Github, href: "https://github.com/prathamhanda", label: "GitHub" },
-  { icon: Linkedin, href: "https://www.linkedin.com/in/prathamh/", label: "LinkedIn" },
-  { icon: Mail, href: "mailto:prathamhanda10@gmail.com", label: "Mail" },
+  {icon: Globe, href: "https://pratham.codes", label: "Website" },
+  { icon: Linkedin, href: "https://www.linkedin.com/in/prathamh/", label: "LinkedIn" }
 ];
 
 const CreatorSection = () => {
