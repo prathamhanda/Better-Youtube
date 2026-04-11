@@ -64,7 +64,7 @@ const HeroSection = () => {
           </p>
 
           <motion.a
-            href="#"
+            href="/download"
             whileHover={{ scale: 1.04 }}
             whileTap={{ scale: 0.97 }}
             className="inline-flex items-center gap-3 gradient-red text-primary-foreground font-semibold px-8 py-4 rounded-xl text-lg glow-border-strong transition-shadow duration-300 hover:shadow-[0_0_50px_hsl(348,100%,50%,0.5)]"

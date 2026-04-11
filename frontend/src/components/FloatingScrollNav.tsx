@@ -2,7 +2,7 @@ import { Chrome } from "lucide-react";
 import { useEffect, useState } from "react";
 
 const EXTENSION_NAME = "BetterYoutube";
-const ADD_TO_CHROME_HREF = "#";
+const ADD_TO_CHROME_HREF = "/download";
 
 const FloatingScrollNav = () => {
   const [isVisible, setIsVisible] = useState(false);
