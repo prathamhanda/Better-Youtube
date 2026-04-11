@@ -1,8 +1,9 @@
 import { Chrome } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 const EXTENSION_NAME = "BetterYoutube";
-const ADD_TO_CHROME_HREF = "/download";
+const ADD_TO_CHROME_TO = "/download";
 
 const FloatingScrollNav = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -53,8 +54,8 @@ const FloatingScrollNav = () => {
           </div>
         </div>
 
-        <a
-          href={ADD_TO_CHROME_HREF}
+        <Link
+          to={ADD_TO_CHROME_TO}
           className={
             "inline-flex items-center gap-2 gradient-red text-primary-foreground " +
             "font-semibold rounded-full " +
@@ -64,7 +65,7 @@ const FloatingScrollNav = () => {
         >
           <Chrome className="h-4 w-4" />
           <span className="whitespace-nowrap">Add to Chrome</span>
-        </a>
+        </Link>
       </nav>
     </div>
   );

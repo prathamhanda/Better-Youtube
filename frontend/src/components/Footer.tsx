@@ -1,5 +1,8 @@
 import { Chrome } from "lucide-react";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
+
+const MotionLink = motion.create(Link);
 
 const Footer = () => {
   return (
@@ -16,15 +19,15 @@ const Footer = () => {
         <p className="text-muted-foreground mb-10 max-w-md mx-auto">
           Join thousands who've reclaimed their attention on YouTube.
         </p>
-        <motion.a
-          href="/download"
+        <MotionLink
+          to="/download"
           whileHover={{ scale: 1.04 }}
           whileTap={{ scale: 0.97 }}
           className="inline-flex items-center gap-3 gradient-red text-primary-foreground font-semibold px-10 py-5 rounded-xl text-lg glow-border-strong transition-shadow duration-300 hover:shadow-[0_0_60px_hsl(348,100%,50%,0.5)]"
         >
           <Chrome size={22} />
           Add to Chrome — It's Free
-        </motion.a>
+        </MotionLink>
       </div>
 
       {/* Bottom bar */}

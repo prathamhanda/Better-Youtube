@@ -1,6 +1,9 @@
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { Chrome } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+
+const MotionLink = motion.create(Link);
 
 const HeroSection = () => {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
@@ -63,15 +66,15 @@ const HeroSection = () => {
             Replace the infinite doom-scroll with tidy containers and pop out any video with native Picture-in-Picture. The ultimate aesthetic upgrade for YouTube.
           </p>
 
-          <motion.a
-            href="/download"
+          <MotionLink
+            to="/download"
             whileHover={{ scale: 1.04 }}
             whileTap={{ scale: 0.97 }}
             className="inline-flex items-center gap-3 gradient-red text-primary-foreground font-semibold px-8 py-4 rounded-xl text-lg glow-border-strong transition-shadow duration-300 hover:shadow-[0_0_50px_hsl(348,100%,50%,0.5)]"
           >
             <Chrome size={22} />
             Add to Chrome — It's Free
-          </motion.a>
+          </MotionLink>
         </motion.div>
 
         {/* Right: floating glassmorphic card mockup */}
